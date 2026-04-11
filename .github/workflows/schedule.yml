@@ -2,13 +2,15 @@ name: Market Data Auto-Update
 
 on:
   schedule:
-    # 매주 월~금, 한국 시간 오후 6시 10분 (UTC 기준 오전 9시 10분) 실행
     - cron: '10 9 * * 1-5'
-  workflow_dispatch: # 내가 원할 때 수동으로 버튼을 눌러 실행할 수 있게 해줌
+  workflow_dispatch:
+
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
 
 jobs:
   build:
-    runs-on: ubuntu-latest # 리눅스 가상 컴퓨터 사용
+    runs-on: ubuntu-latest 
 
     steps:
       - name: 내 코드 가져오기
@@ -17,7 +19,7 @@ jobs:
       - name: 파이썬 설치하기
         uses: actions/setup-python@v5
         with:
-          python-version: '3.11' # 파이썬 버전 지정
+          python-version: '3.11'
 
       - name: 필요 라이브러리 설치하기
         run: |
