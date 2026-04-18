@@ -1,6 +1,5 @@
 import yfinance as yf
 from notion_client import Client
-from datetime import datetime
 import math
 import os
 
@@ -15,27 +14,24 @@ def get_korea_data():
         "원엔환율(100엔)": "JPYKRW=X"
     }
     results = []
-    # 💡 한국장용: 수집하는 당일이 곧 기준일 (오늘)
-    target_date = datetime.now().strftime("%Y-%m-%d")
     
       
     for name, ticker in tickers.items():
         try:
-            # 안전하게 최근 5일치 데이터를 불러옵니다.
             hist = yf.Ticker(ticker).history(period="5d")
             
             if len(hist) >= 2:
+                actual_date = hist.index[-1].strftime("%Y-%m-%d")
+                
                 current_price = hist['Close'].iloc[-1]
                 prev_price = hist['Close'].iloc[-2]
                 
-                # 거래량 가져오기 (결측치나 데이터가 없는 경우 0으로 처리)
                 volume = 0
                 if 'Volume' in hist.columns:
                     vol_data = hist['Volume'].iloc[-1]
                     if not math.isnan(vol_data):
                         volume = int(vol_data)
-                
-                # 원엔환율 100엔 단위 조정
+            
                 if ticker == "JPYKRW=X":
                     current_price *= 100
                     prev_price *= 100
@@ -44,12 +40,12 @@ def get_korea_data():
                 fltrt = (vs / prev_price) * 100
                 
                 results.append({
-                    "날짜": target_date,
+                    "날짜": actual_date,
                     "지수명": name,
                     "현재가": round(current_price, 2),
                     "전일대비": round(vs, 2),
                     "등락률": round(fltrt, 2),
-                    "거래량": volume  # 거래량 추가!
+                    "거래량": volume  
                 })
         except Exception as e:
             print(f"⚠️ {name} 데이터 수집 실패: {e}")
